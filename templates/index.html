@@ -1,0 +1,232 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Habit Tracker</title>
+
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+<body>
+
+  <div class="container">
+
+    <header class="header">
+      <div>
+        <h1 class="site-title">Habit Tracker</h1>
+        <p class="site-subtitle">Build better habits every day</p>
+      </div>
+
+      <div class="auth-buttons">
+        {% if user.is_authenticated %}
+          <span style="align-self:center;">{{ user.username }}</span>
+
+          <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+                <button class="btn" type="submit">Logout</button>
+          </form>
+          
+        {% else %}
+          <a href="{% url 'login' %}">
+            <button class="btn">Sign in</button>
+          </a>
+
+          <a href="{% url 'register' %}">
+            <button class="btn btn-black">Register</button>
+          </a>
+        {% endif %}
+      </div>
+    </header>
+
+    <section class="stats-grid">
+
+      <div class="card">
+        <p>Days</p>
+        <h2 class="stat-value">
+          {{ completed_today }}/{{ total_week_tasks }}
+        </h2>
+        <p class="stat-label">Completed habit days</p>
+      </div>
+
+      <div class="card">
+        <p>Streak</p>
+        <h2 class="stat-value">
+          {{ best_streak }} days
+        </h2>
+        <p class="stat-label">Current streak</p>
+      </div>
+
+      <div class="card">
+        <p>Progress</p>
+        <h2 class="stat-value">
+          {{ completion_rate }}%
+        </h2>
+        <p class="stat-label">Completed</p>
+      </div>
+
+    </section>
+
+    <div class="main-grid">
+
+      <section class="card">
+
+        <div class="column-header">
+          <h2 class="section-title">Your Habits</h2>
+
+          {% if user.is_authenticated %}
+            <button
+              type="button"
+              class="btn"
+              onclick="document.getElementById('habit-form').classList.toggle('show-form')"
+            >
+              + Add Habit
+            </button>
+          {% endif %}
+        </div>
+
+        {% if user.is_authenticated %}
+          <form
+            id="habit-form"
+            class="habit-form"
+            method="post"
+            action="{% url 'add_habit' %}"
+          >
+            {% csrf_token %}
+
+            <div>
+              {{ form.title }}
+            </div>
+
+            <div>
+              {{ form.description }}
+            </div>
+
+            <button class="btn btn-black" type="submit">
+              Save Habit
+            </button>
+          </form>
+        {% endif %}
+
+        {% for habit in habits %}
+
+          <div class="habit-item">
+
+            <div class="habit-header">
+
+              <div class="habit-content">
+                <h3 class="habit-title">{{ habit.title }}</h3>
+
+                <p class="habit-desc">
+                  {{ habit.description }}
+                </p>
+
+                <p class="habit-streak">
+                  {{ habit.streak }} day streak
+                </p>
+              </div>
+
+              <form method="post" action="{% url 'delete_habit' habit.id %}">
+                {% csrf_token %}
+                <button class="delete-btn" type="submit">
+                  Delete
+                </button>
+              </form>
+
+            </div>
+
+            <div class="days-grid">
+
+              {% for day in week_days %}
+
+                <form method="post" action="{% url 'toggle_habit' habit.id day.date|date:'Y-m-d' %}">
+                  {% csrf_token %}
+
+                <button
+                  type="submit"
+                  class="day-box {% for completion in habit.completions.all %}{% if completion.date == day.date %}completed{% endif %}{% endfor %}"
+                  {% if not day.is_today %}disabled{% endif %}
+                >
+                  <div class="day-name">
+                    {{ day.name }}
+                  </div>
+
+                  <div class="day-dot"></div>
+                </button>
+                </form>
+
+              {% endfor %}
+
+            </div>
+
+          </div>
+
+        {% empty %}
+
+          <p>No habits yet.</p>
+
+        {% endfor %}
+
+      </section>
+
+      <aside class="sidebar-column">
+
+        <div class="card">
+          <h3 class="sidebar-title">Weekly Overview</h3>
+
+          <div class="overview-row">
+            <span class="overview-label">Habits</span>
+            <span class="overview-value">{{ total_habits }}</span>
+          </div>
+
+          <div class="overview-row">
+            <span class="overview-label">Completed days</span>
+            <span class="overview-value">{{ completed_today }}</span>
+          </div>
+
+          <div class="overview-row">
+            <span class="overview-label">Weekly progress</span>
+            <span class="overview-value">{{ completion_rate }}%</span>
+          </div>
+
+          <div class="activity-block">
+            <p class="activity-title">
+              Last Activity
+            </p>
+
+          <div class="activity-grid">
+           {% for day in activity_days %}
+             <div
+               class="grid-dot {% if day.completed %}completed{% endif %}"
+               title="{{ day.date }}"
+             >
+             </div>
+                {% endfor %}
+          </div>
+          </div>
+        </div>
+
+        <div class="card">
+
+          <h3 class="sidebar-title">
+            Keep Going!
+          </h3>
+          
+          <p class="quote-text">
+            “Success is the sum of small efforts repeated day in and day out.”
+          </p>
+
+          <p class="quote-author">
+            — Robert Collier
+          </p>
+        </div>
+
+      </aside>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

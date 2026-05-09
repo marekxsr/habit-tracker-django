@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+
+  <div class="container">
+    <div class="card">
+      <h1 class="site-title">Register</h1>
+
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button class="btn btn-black" type="submit">
+          Register
+        </button>
+      </form>
+
+      <p style="margin-top: 15px;">
+        Already have account?
+        <a href="{% url 'login' %}">Sign in</a>
+      </p>
+    </div>
+  </div>
+
+</body>
+</html>
