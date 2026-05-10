@@ -230,7 +230,7 @@ body {
 }
 
 .day-box.completed {
-  background: #111;
+  background: #22c55e;
 }
 
 .day-box.completed .day-name {
@@ -301,7 +301,7 @@ body {
 }
 
 .grid-dot.completed {
-  background: #111;
+  background: #4fd67c;
   color: transparent;
 }
 
